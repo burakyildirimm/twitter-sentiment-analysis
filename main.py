@@ -8,11 +8,11 @@ import asyncio
 import nest_asyncio
 nest_asyncio.apply()
 
+
 SEARCH_TERM = 'bitcoin'
 SEARCH_LANG = 'tr'
 SEARCH_COUNT = 5
 OUPUT_FILE = 'twitter.json'
-
 
 def controlTwitterFile():
     if os.path.exists('twitter.json'):
@@ -70,11 +70,11 @@ async def cleanTweets(tweets):
     response = []
     for tweet in tweets:
         if len(re.findall('@', tweet)) > 0:
-            cleaned =  re.sub('@[0-9]*[A-Za-z]*[0-9]*', '', tweet)
-            cleaned =  re.sub('#[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
-            cleaned =  re.sub('https://[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
-            cleaned =  re.sub('http://[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
-            cleaned =  re.sub('[0-9]*[A-Za-z]*[0-9]*@+[0-9]*[A-Za-z]*[0-9]*\.[a-z]*', '', cleaned, flags=re.S)
+            cleaned = await re.sub('@[0-9]*[A-Za-z]*[0-9]*', '', tweet)
+            cleaned = await re.sub('#[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
+            cleaned = await re.sub('https://[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
+            cleaned = await re.sub('http://[0-9]*[A-Za-z]*[0-9]*', '', cleaned)
+            cleaned = await re.sub('[0-9]*[A-Za-z]*[0-9]*@+[0-9]*[A-Za-z]*[0-9]*\.[a-z]*', '', cleaned, flags=re.S)
             response.append(cleaned)
 
     return response
@@ -87,16 +87,18 @@ async def getTweets():
             datas = json.load(file)["tweets"]
             for data in datas:
                 result.append(data)
-
+                
             file.close()
     except:
         print('Can not open file')
-        
+    
     try:
         result = await cleanTweets(result)
-        return result
     except:
         print('Error occured while cleaning data..')
+        print('Regex async problem waiting for to be fixed!')
+
+    return result
 
 
 def analysis(tweets):
