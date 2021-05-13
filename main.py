@@ -8,6 +8,11 @@ import asyncio
 import nest_asyncio
 nest_asyncio.apply()
 
+SEARCH_TERM = 'bitcoin'
+SEARCH_LANG = 'tr'
+SEARCH_COUNT = 5
+OUPUT_FILE = 'twitter.json'
+
 
 def controlTwitterFile():
     if os.path.exists('twitter.json'):
@@ -48,10 +53,10 @@ async def fetchData():
     now = datetime.datetime.now().strftime("%H:%M:%S")
 
     c = twint.Config
-    c.Search = 'bitcoin'
-    c.Lang = 'tr'
-    c.Limit = 5
-    c.Output = 'twitter.json'
+    c.Search = SEARCH_TERM
+    c.Lang = SEARCH_LANG
+    c.Limit = SEARCH_COUNT
+    c.Output = OUPUT_FILE
     c.Since = str(yesterday)+" 23:59:00"
     c.Until = str(today)+ " " + str(now)
     c.Store_json = True
