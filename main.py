@@ -6,21 +6,28 @@ import os
 import re
 import asyncio
 import nest_asyncio
-nest_asyncio.apply()
+nest_asyncio.apply()    # a plugin for asyncio to work properly with (twint)
 
+# Setting up Global variables
 
-SEARCH_TERM = 'bitcoin'
-SEARCH_LANG = 'tr'
-SEARCH_COUNT = 5
+SEARCH_TERM = ['rich', 'bitcoin']
+SEARCH_LANG = 'en'
+SEARCH_COUNT = 30
 OUPUT_FILE = 'twitter.json'
 
-def controlTwitterFile():
+# Setting up functions
+
+async def controlTwitterFile():
+    # This function check if the file exists
+
     if os.path.exists('twitter.json'):
         os.remove('twitter.json')
     return
 
 
-async def formatData():
+async def copyToTweetsPage():
+    # We extract the data that need to be analyzed here
+
     tweets = {}
     tweets["tweets"] = []
     try:
@@ -46,27 +53,31 @@ async def formatData():
         print('Can not open file for writing')
 
 async def fetchData():
-    controlTwitterFile()
+    # Let's fetch the our target tweets with twint!
+
+    await controlTwitterFile()
 
     today = datetime.date.today()
     yesterday = today - datetime.timedelta(1)
     now = datetime.datetime.now().strftime("%H:%M:%S")
-
+    
     c = twint.Config
     c.Search = SEARCH_TERM
     c.Lang = SEARCH_LANG
     c.Limit = SEARCH_COUNT
     c.Output = OUPUT_FILE
-    c.Since = str(yesterday)+" 23:59:00"
+    c.Since = str(yesterday)
     c.Until = str(today)+ " " + str(now)
     c.Store_json = True
 
     await twint.run.Search(c)
-    await formatData()
+    await copyToTweetsPage()
 
 
 
 async def cleanTweets(tweets):
+    # This function clears all unwanted data
+
     response = []
     for tweet in tweets:
         if len(re.findall('@', tweet)) > 0:
@@ -81,6 +92,8 @@ async def cleanTweets(tweets):
     
 
 async def getTweets():
+    # let's we take all tweets as an array!
+
     result = []
     try:
         with open('tweets.json', 'r') as file:
@@ -96,12 +109,14 @@ async def getTweets():
         result = await cleanTweets(result)
     except:
         print('Error occured while cleaning data..')
-        print('Regex async problem waiting for to be fixed!')
+        print('Regex async problem, waiting for to be fixed!')
 
     return result
 
 
 def analysis(tweets):
+    # Now we can analyze sentiment
+
     if tweets == None:
         print("Analysis could not be done!")
         return
@@ -109,7 +124,7 @@ def analysis(tweets):
     positive = 0
     neutral = 0
     negative = 0
-    print("lenght : " + str(len(tweets)))
+    print("tweets count : " + str(len(tweets)))
     for tweet in tweets:
         analysis = TextBlob(tweet)
         tweetPolarity = analysis.polarity
@@ -130,6 +145,8 @@ def analysis(tweets):
     print(f'Total: {polarity}')
 
 async def main():
+    # main flow
+
     await fetchData()
     tweets = await getTweets()
     analysis(tweets)
